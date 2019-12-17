@@ -1,114 +1,73 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
+import React, {Component} from 'react'; // 1
+import {Text, View, StyleSheet, TextInput, FlatList} from 'react-native'; // 2
+import api from './service/api';
+import Card from './components/card';
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+// 3
+export default class App extends Component {
+  state = {
+    searchText: '',
+    searchResults: null, // 1
+  }
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  submitSearch = async () => {
+    if (this.state.searchText != '') { 
+      try {
+        const response = await api.get('/search/shows', {
+          params: { q: this.state.searchText },
+        });
+        this.setState({ searchResults: response.data }); // 2
+      } catch(error) { 
+        alert(JSON.stringify(error));
+      }
+    }
+  }
+  render() {
+    return (
+      <View style={styles.screen}>
+        <View style={styles.search}>
+          <TextInput
+          placeholder={'Procure uma série'}
+          style={styles.input}
+          onChangeText={(text) => this.setState({ searchText: text })}
+          onSubmitEditing={() => this.submitSearch()}
+         />
+        </View>
+        <View style={styles.results}>
+        <FlatList
+          data={this.state.searchResults}
+          renderItem={({ item }) => <Card info={item.show} />}
+          keyExtractor={item => item.show.id}
+        />
+        </View>
+      </View>
+    );
+  }
+}
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
-};
-
+// 5
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  screen: {
+    flex: 1,
+    flexDirection: 'column',
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  search: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  body: {
-    backgroundColor: Colors.white,
+  input: {
+    marginTop: 55,
+    height: 40,
+    width: 250,
+    borderColor: 'lightgray',
+    borderWidth: 1,
+    padding: 10,
+    fontSize: 20,
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  results: {
+    flex: 4,
+    backgroundColor: 'lightgray',
+    alignItems: 'center',
   },
 });
-
-export default App;
