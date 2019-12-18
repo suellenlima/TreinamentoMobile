@@ -1,10 +1,13 @@
 import React, {Component} from 'react'; // 1
 import {Text, View, StyleSheet, TextInput, FlatList} from 'react-native'; // 2
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
+
 import api from './service/api';
 import Card from './components/card';
 
 // 3
-export default class App extends Component {
+class App extends Component {
   state = {
     searchText: '',
     searchResults: null, // 1
@@ -71,3 +74,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+const AppNavigator = createStackNavigator({
+  Home: {
+    screen: App,
+    navigationOptions: {
+      header: null
+    }
+  },
+});
+
+export default createAppContainer(AppNavigator);
